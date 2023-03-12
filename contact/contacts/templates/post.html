@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+
+{% load lo %}
+<head>
+    <meta charset="UTF-8">
+    
+    {% load static %}
+    <link rel="icon" type="image/x-icon" href="{% static '/img/logo.png'%}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css">
+
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css'%}">
+
+    <!------------------LIght BOx for Gallery-------------->
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/lightbox.min.css'%}">
+        <!------------------LIght BOx for Gallery-------------->
+    <title>{{ post.name }}</title>
+</head>
+
+<body>
+
+
+    <!-------------------------------NAvigation Starts------------------>
+
+    <nav class="navbar navbar-expand-md navbar-dark mb-4" style="background-color:#3097D1">
+        <a href="/" class="navbar-brand">
+            {% load static %}
+            <img src="{% static 'img/logo.png' %}" alt="logo" class="img-fluid" width="80px" height="100px"></a>
+
+        <button class="navbar-toggler" data-toggle="collapse" data-target="#responsive"><span
+                class="navbar-toggler-icon"></span></button>
+
+
+        <div class="collapse navbar-collapse" id="responsive">
+            <ul class="navbar-nav mr-auto text-capitalize">
+                <li class="nav-item"><a href="/" class="nav-link">home</a></li>
+                <li class="nav-item"><a href="/profile/{{user.pk}}" class="nav-link">profile</a></li>
+                <li class="nav-item"><a href="/postadd" class="nav-link">Добавить пост</a></li>
+
+            </ul>
+
+            
+            {% if user.face %}
+
+
+            <img src="/media/{{ user.face }}" alt="" class="rounded-circle ml-3 d-none d-md-block" width="32px"
+                height="32px">
+            {% else %}
+            {% load static %}
+            <img src="{% static 'img/whoami/png' %}" alt="" class="rounded-circle ml-3 d-none d-md-block" width="32px"
+                height="32px">
+
+            {% endif %}
+
+
+
+
+        </div>
+
+
+
+
+
+    </nav>
+
+    <!---------------------------------------------Ends navigation------------------------------>
+
+    <!---------------------------MOdal Section  satrts------------------->
+    <!-------------------------------------------Start Grids layout for lg-xl-3 columns and (xs-lg 1 columns)--------------------------------->
+
+
+    <div class="container">
+        <div class="row" style="justify-content: center;">
+
+
+            <div class="card-body">
+                <div style="display: block;">
+                    {% if post.author.face %}
+                    <img src="/media/{{ post.author.face }}" alt="img" width="55px" height="55px"
+                        class="rounded-circle mr-3">
+                    {% else %}
+                    {% load static %}
+                    <img src="{% static 'img/whoami.png' %}" alt="img" width="55px" height="55px"
+                        class="rounded-circle mr-3">
+                    {% endif %}
+                    <div class="media-body">
+
+                        <h5>{{ post.author.username }} </h5>
+                        <p class="card-text text-justify">{{ post.text }}</p>
+
+
+
+                        <div class="row no-gutters mb-3">
+                            <div class="p-1 text-center">
+
+                                <img src="/media/{{ post.images.all.0.img }}" alt=""
+                                    class="img-fluid img-thumbnail"><br>
+                                <img src="/media/{{ post.images.all.1.img }}" alt=""
+                                    class="img-fluid img-thumbnail">
+
+
+                            </div>
+
+                            <div class=" p-1 text-center">
+                                {% if post.images.all.2.img %}
+                                <img src="/media/{{ post.images.all.2.img }}" alt=""
+                                    class="img-fluid mb-2">
+                                {% endif %}
+                                {% if post.images.all.3.img %}
+                                <img src="/media/{{ post.images.all.3.img }}" alt="" class="img-fluid">
+                                {% endif %}
+
+                            </div>
+
+
+                        </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        <form method="post" action="/comment/add/{{post.pk}}/">
+                            {% csrf_token %}
+                            
+                            <textarea class="form-control" name="content" placeholder="Комментарий"></textarea><br/>
+                            <button class="btn btn-success" type="submit">Отправить</button><br/>
+
+
+
+                        </form>
+                        {% for comment in post.comments.all %}
+
+                        {% if comment.parent_comment %}
+                        {% else %}
+                        <div>
+                            {% if comment.author.face %}
+                                <img src="/media/{{ comment.author.face }}" alt=""
+                                    class="rounded-circle  d-none d-md-block" width="32px" height="32px">
+                            {% else %}
+                                {% load static %}
+                                <img src="{% static 'img/whoami.png' %}" alt=""
+                                    class="rounded-circle ml-3 d-none d-md-block" width="32px" height="32px">
+
+                            {% endif %}
+
+                            <div class="media-body">
+                                <p style="word-wrap: break-word; overflow-x:hidden;"
+                                    class="card-text text-capitalize text-justify">{{comment.author.username }}:{{ comment.content | markdown | safe }}</p>
+                                    <p class="parent-comment-button  text-primary" style="cursor:pointer;">Ответить</p>
+                                        
+                                </div>
+                                <form class="form_parent" style="display: none;" method="post" action="/comment/parent/add/{{comment.pk}}">
+                                    {% csrf_token %}
+                                    
+                                    <textarea class="form-control"  placeholder="Комментарий"  name="content"></textarea><br/>
+                                    <button class="btn btn-success" type="submit">Отправить</button><br/>
+    
+                                </form>
+
+                        </div>
+
+                        {% endif %}
+                        {% if comment.replies.all %}
+                        <p class="d-flex " style="align-items: center;">{% load static %} <img
+                                style="height: 50px;width: 50px;" class="rounded-circle  d-md-block"
+                                src="{% static 'img/reply.webp' %}" />Replies to comment  <em> {{ comment.author }}</em></p>
+
+                        {% endif %}
+                        {% for reply in comment.replies.all %}
+
+                        <div  class="ms-4 parent-comment">
+                            {% if reply.author.face %}
+
+
+                            <img src="/media/{{ reply.author.face }}" alt=""
+                                class="rounded-circle   d-md-block" width="32px" height="32px">
+                            {% else %}
+                            {% load static %}
+                            <img src="{% static 'img/whoami.png' %}" alt=""
+                                class="rounded-circle ml-3  d-md-block" width="32px" height="32px">
+
+                            {% endif %}
+
+                            <div class="media-body">
+                                <p style="word-wrap: break-word; overflow-x:hidden;"
+                                    class="card-text text-capitalize text-justify">{{ reply.author.username}}: {{ reply.content }}
+                            </div>
+
+
+                        </div>
+                        {% endfor %}
+
+
+
+
+                        {% endfor %}
+
+
+
+
+                    </div>
+                    <small>{{ post.public_data }}</small>
+
+
+
+                </div>
+
+
+
+
+
+            </div>
+
+
+
+
+
+
+        </div>
+
+
+
+
+
+    </div>
+
+    {% load static %}
+    <script src="{% static 'js/script.js' %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+</body>
+
+</html>
